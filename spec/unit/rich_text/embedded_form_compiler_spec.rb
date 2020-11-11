@@ -1,4 +1,4 @@
-require "dry-validation"
+require "dry/schema"
 require "formalist/form"
 require "formalist/elements/standard"
 require "formalist/rich_text/embedded_forms_container"
@@ -23,9 +23,9 @@ RSpec.describe Formalist::RichText::EmbeddedFormCompiler do
   }
 
   let(:schema) {
-    Dry::Validation.Params do
-      required(:image_id).filled(:int?)
-      required(:caption).filled(:str?)
+    Dry::Schema.Params do
+      required(:image_id).filled(:integer)
+      required(:caption).filled(:string)
     end
   }
 
@@ -67,7 +67,7 @@ RSpec.describe Formalist::RichText::EmbeddedFormCompiler do
     }
 
     it "builds a form AST with the data and validation messages incorporated" do
-      expect(output[1]).to eq ["block", ["atomic", "48b4f", [["entity", ["formalist", "1", "IMMUTABLE", {"name" => "image_with_caption", "label" => "Image with caption", "data" => {"image_id" => "", "caption" => "Large panda"}, "form" => [[:field, [:image_id, :text_field, nil, ["must be filled"], [:object, []]]], [:field, [:caption, :text_field, "Large panda", [], [:object, []]]]]}, [["inline", [[], "¶"]]]]]]]]
+      expect(output[1]).to eq ["block", ["atomic", "48b4f", [["entity", ["formalist", "1", "IMMUTABLE", {"name" => "image_with_caption", "label" => "Image with caption", "data" => {"image_id" => "", "caption" => "Large panda"}, "form" => [[:field, [:image_id, :text_field, "", ["must be filled"], [:object, []]]], [:field, [:caption, :text_field, "Large panda", [], [:object, []]]]]}, [["inline", [[], "¶"]]]]]]]]
     end
 
     it "leaves the rest of the data unchanged" do
