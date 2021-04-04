@@ -5,10 +5,15 @@ module Formalist
     class Many < Element
       attribute :action_label
       attribute :sortable
+      attribute :moveable
       attribute :label
       attribute :max_height
       attribute :placeholder
       attribute :validation
+      attribute :allow_create, default: true
+      attribute :allow_update, default: true
+      attribute :allow_destroy, default: true
+      attribute :allow_reorder, default: true
 
       # @api private
       attr_reader :child_template
@@ -28,7 +33,7 @@ module Formalist
       # @api private
       def fill(input: {}, errors: {})
         input = input.fetch(name) { [] }
-        errors = errors.fetch(name) { {} }
+        errors = errors[name] || {}
 
         # Errors look like this when they are on the array itself: ["size cannot be greater than 2"]
         # Errors look like this when they are on children: {0=>{:summary=>["must be filled"]}
@@ -45,17 +50,6 @@ module Formalist
           children: children,
           child_template: child_template,
         )
-      end
-
-      # Until we can put defaults on `Types::Bool`, supply them here
-      # @api private
-      def attributes
-        {
-          allow_create: true,
-          allow_update: true,
-          allow_destroy: true,
-          allow_reorder: true,
-        }.merge(super)
       end
 
       # Converts a collection of "many" repeating elements into an abstract

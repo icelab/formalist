@@ -1,18 +1,22 @@
+require "dry/validation/contract"
+
 RSpec.describe Formalist::Form do
-  let(:schema) {
-    Dry::Validation.Schema do
-      required(:title).filled
-      required(:rating).filled(:int?)
+  let(:contract) {
+    Class.new(Dry::Validation::Contract) do
+      schema do
+        required(:title).filled(:string)
+        required(:rating).filled(:integer)
 
-      required(:reviews).each do
-        required(:summary).filled
-        required(:rating).filled(:int?, gteq?: 1, lteq?: 10)
-      end
+        required(:reviews).array(:hash) do
+          required(:summary).filled(:string)
+          required(:rating).filled(:integer, gteq?: 1, lteq?: 10)
+        end
 
-      required(:meta).schema do
-        required(:pages).filled(:int?, gteq?: 1)
+        required(:meta).hash do
+          required(:pages).filled(:integer, gteq?: 1)
+        end
       end
-    end
+    end.new
   }
 
   subject(:form_class) {
@@ -56,7 +60,7 @@ RSpec.describe Formalist::Form do
   }
 
   it "outputs an AST" do
-    form = form_class.new.fill(input: input, errors: schema.(input).errors.to_h)
+    form = form_class.new.fill(input: input, errors: contract.(input).errors)
 
     expect(form.to_ast).to eq [
       [:compound_field, [
@@ -88,7 +92,7 @@ RSpec.describe Formalist::Form do
           ],
           [
             [:field, [:summary, :field, "Great!", [], [:object, []]]],
-            [:field, [:rating, :field, 0, ["must be greater than or equal to 1", "must be less than or equal to 10"], [:object, []]]]
+            [:field, [:rating, :field, 0, ["must be greater than or equal to 1"], [:object, []]]]
           ]
         ]
       ]],

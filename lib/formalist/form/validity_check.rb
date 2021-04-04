@@ -41,9 +41,18 @@ module Formalist
       def visit_many(node)
         _name, _type, errors, _attributes, _child_template, children = node
 
-        # The `children`` parameter for `many` elements is for some reason
-        # doubly nested right now, so we need to flatten it.
+        # The `children parameter for `many` elements is nested since there are
+        # many groups of elements, we need to flatten to traverse them all
         errors.empty? && children.flatten(1).map { |child| visit(child) }.all?
+      end
+
+      # TODO work out what to do with this.
+      # I think it's only relevant to many_forms
+      # nested in rich text ast
+      def visit_many_forms(node)
+        _name, _type, errors, _attributes, children = node
+
+        errors.empty? && children.map { |child| visit(child[:form]) }.all?
       end
 
       def visit_section(node)
